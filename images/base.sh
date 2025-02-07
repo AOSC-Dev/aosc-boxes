@@ -7,41 +7,9 @@ function pre() {
   # https://gitlab.archlinux.org/archlinux/arch-boxes/-/issues/117
   rm "${MOUNT}/etc/machine-id"
 
-  # Swap
-  arch-chroot "${MOUNT}" /usr/bin/btrfs subvolume create /swap
-  chattr +C "${MOUNT}/swap"
-  chmod 0700 "${MOUNT}/swap"
-  arch-chroot "${MOUNT}" /usr/bin/btrfs filesystem mkswapfile --size 512m --uuid clear /swap/swapfile
-  echo -e "/swap/swapfile none swap defaults 0 0" >>"${MOUNT}/etc/fstab"
-
   arch-chroot "${MOUNT}" /usr/bin/systemd-firstboot --locale=C.UTF-8 --timezone=UTC --hostname=archlinux --keymap=us
   ln -sf /run/systemd/resolve/stub-resolv.conf "${MOUNT}/etc/resolv.conf"
-
-  # Setup pacman-init.service for clean pacman keyring initialization
-  cat <<EOF >"${MOUNT}/etc/systemd/system/pacman-init.service"
-[Unit]
-Description=Initializes Pacman keyring
-Before=sshd.service cloud-final.service archlinux-keyring-wkd-sync.service
-After=time-sync.target
-ConditionFirstBoot=yes
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/bin/pacman-key --init
-ExecStart=/usr/bin/pacman-key --populate
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-  # Setup mirror list to Geo IP mirrors
-  cat <<EOF >"${MOUNT}/etc/pacman.d/mirrorlist"
-Server = https://geo.mirror.pkgbuild.com/\$repo/os/\$arch
-Server = https://mirror.rackspace.com/archlinux/\$repo/os/\$arch
-Server = https://mirror.leaseweb.net/archlinux/\$repo/os/\$arch
-EOF
-
+  
   # enabling important services
   arch-chroot "${MOUNT}" /bin/bash -e <<EOF
 source /etc/profile

@@ -5,10 +5,11 @@
 # errexit: "Exit immediately if [...] command exits with a non-zero status."
 set -o nounset -o errexit
 shopt -s extglob
-readonly DEFAULT_DISK_SIZE="2G"
+readonly DEFAULT_DISK_SIZE="20G"
 readonly IMAGE="image.img"
 # shellcheck disable=SC2016
-readonly MIRROR='https://geo.mirror.pkgbuild.com/$repo/os/$arch'
+readonly MIRROR='https://https://repo.aosc.io/'
+readonly AOSC_ARCH=$(dpkg --print-architecture)
 
 function init() {
   readonly ORIG_PWD="${PWD}"
@@ -50,55 +51,25 @@ function setup_disk() {
     --clear \
     --new 0:0:+1M --typecode=0:ef02 --change-name=0:'BIOS boot partition' \
     --new 0:0:+300M --typecode=0:ef00 --change-name=0:'EFI system partition' \
-    --new 0:0:0 --typecode=0:8304 --change-name=0:'Arch Linux root' \
+    --new 0:0:0 --typecode=0:8304 --change-name=0:'AOSC OS root' \
     "${IMAGE}"
 
   LOOPDEV=$(losetup --find --partscan --show "${IMAGE}")
   # Partscan is racy
   wait_until_settled "${LOOPDEV}"
   mkfs.fat -F 32 -S 4096 "${LOOPDEV}p2"
-  mkfs.btrfs "${LOOPDEV}p3"
+  mkfs.ext4 "${LOOPDEV}p3"
   mount -o compress-force=zstd "${LOOPDEV}p3" "${MOUNT}"
   mount --mkdir "${LOOPDEV}p2" "${MOUNT}/efi"
 }
 
-# Install Arch Linux to the filesystem (bootstrap)
+# Install AOSC to the filesystem (bootstrap)
 function bootstrap() {
-  cat <<EOF >pacman.conf
-[options]
-Architecture = auto
-
-[core]
-Include = mirrorlist
-
-[extra]
-Include = mirrorlist
-EOF
-  echo "Server = ${MIRROR}" >mirrorlist
-
-  # We use the hosts package cache
-  pacstrap -c -C pacman.conf -K -M "${MOUNT}" base linux grub openssh sudo btrfs-progs dosfstools efibootmgr qemu-guest-agent
-  # Workaround for https://gitlab.archlinux.org/archlinux/arch-install-scripts/-/issues/56
-  gpgconf --homedir "${MOUNT}/etc/pacman.d/gnupg" --kill gpg-agent
-  cp mirrorlist "${MOUNT}/etc/pacman.d/"
+  aoscbootstrap stable "${MOUNT}" --arch=$AOSC_ARCH --config=/usr/share/aoscbootstrap/config/aosc-mainline.toml --include="boot-base systemd-base qemu-guest-agent openssh" "${MIRROR}"
 }
 
 # Cleanup the image and trim it
 function image_cleanup() {
-  # Remove pacman key ring for re-initialization
-  rm -rf "${MOUNT}/etc/pacman.d/gnupg/"
-
-  # The mkinitcpio autodetect hook removes modules not needed by the
-  # running system from the initramfs. This make the image non-bootable
-  # on some systems as initramfs lacks the relevant kernel modules.
-  # Ex: Some systems need the virtio-scsi kernel module and not the
-  # "autodetected" virtio-blk kernel module for disk access.
-  #
-  # So for the initial install we use the fallback initramfs, and
-  # "autodetect" should add the relevant modules to the initramfs when
-  # the user updates the kernel.
-  cp --reflink=always -a "${MOUNT}/boot/"{initramfs-linux-fallback.img,initramfs-linux.img}
-
   sync -f "${MOUNT}/etc/os-release"
   fstrim --verbose "${MOUNT}"
   fstrim --verbose "${MOUNT}/efi"
@@ -122,7 +93,7 @@ function mount_image() {
   wait_until_settled "${LOOPDEV}"
   mount -o compress-force=zstd "${LOOPDEV}p3" "${MOUNT}"
   # Setup bind mount to package cache
-  mount --bind "/var/cache/pacman/pkg" "${MOUNT}/var/cache/pacman/pkg"
+  mount --bind "/var/cache/apt/archives" "${MOUNT}/var/cache/apt/archives"
 }
 
 # Unmount image helper (umount + detach loop device)
@@ -153,7 +124,7 @@ function create_image() {
     truncate -s "${DISK_SIZE}" "${tmp_image}"
     sgdisk --align-end --delete 3 "${tmp_image}"
     sgdisk --align-end --move-second-header \
-      --new 0:0:0 --typecode=0:8304 --change-name=0:'Arch Linux root' \
+      --new 0:0:0 --typecode=0:8304 --change-name=0:'AOSC OS root' \
       "${tmp_image}"
   fi
   mount_image "${tmp_image}"
@@ -162,7 +133,7 @@ function create_image() {
   fi
 
   if [ 0 -lt "${#PACKAGES[@]}" ]; then
-    arch-chroot "${MOUNT}" /usr/bin/pacman -S --noconfirm "${PACKAGES[@]}"
+    arch-chroot "${MOUNT}" /usr/bin/oma install -y "${PACKAGES[@]}"
   fi
   if [ 0 -lt "${#SERVICES[@]}" ]; then
     arch-chroot "${MOUNT}" /usr/bin/systemctl enable "${SERVICES[@]}"
