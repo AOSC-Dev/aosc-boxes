@@ -131,7 +131,7 @@ function create_image() {
   fi
   mount_image "${tmp_image}"
   if [ -n "${DISK_SIZE}" ]; then
-    btrfs filesystem resize max "${MOUNT}" ${DISK_SIZE} 
+    btrfs filesystem resize max "${MOUNT}"
   fi
 
   if [ 0 -lt "${#PACKAGES[@]}" ]; then
