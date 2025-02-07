@@ -17,6 +17,7 @@ The cloud image is meant to be used in "the cloud" and comes with [`cloud-init`]
 You'll need the following dependencies:
 
 * libisoburn
+* qemu (for qemu-img)
 
 ### How to build this
 The official builds are done in our Arch Linux GitLab CI and can be built locally by running (as root):

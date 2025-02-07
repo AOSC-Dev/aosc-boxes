@@ -1,0 +1,7 @@
+boot-base
+systemd-base
+kernel-base
+editor-base
+qemu-guest-agent
+openssh
+sudo

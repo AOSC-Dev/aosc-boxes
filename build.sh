@@ -8,7 +8,7 @@ shopt -s extglob
 readonly DEFAULT_DISK_SIZE="20G"
 readonly IMAGE="image.img"
 # shellcheck disable=SC2016
-readonly MIRROR='https://https://repo.aosc.io/'
+readonly MIRROR='https://repo.aosc.io/debs'
 readonly AOSC_ARCH=$(dpkg --print-architecture)
 
 function init() {
@@ -59,13 +59,13 @@ function setup_disk() {
   wait_until_settled "${LOOPDEV}"
   mkfs.fat -F 32 -S 4096 "${LOOPDEV}p2"
   mkfs.ext4 "${LOOPDEV}p3"
-  mount -o compress-force=zstd "${LOOPDEV}p3" "${MOUNT}"
+  mount "${LOOPDEV}p3" "${MOUNT}"
   mount --mkdir "${LOOPDEV}p2" "${MOUNT}/efi"
 }
 
 # Install AOSC to the filesystem (bootstrap)
 function bootstrap() {
-  aoscbootstrap stable "${MOUNT}" --arch=$AOSC_ARCH --config=/usr/share/aoscbootstrap/config/aosc-mainline.toml --include="boot-base systemd-base qemu-guest-agent openssh" "${MIRROR}"
+  aoscbootstrap stable "${MOUNT}" --arch=$AOSC_ARCH --config=/usr/share/aoscbootstrap/config/aosc-mainline.toml --include-files="${ORIG_PWD}/recipes/base.lst" "${MIRROR}" --force
 }
 
 # Cleanup the image and trim it
@@ -91,7 +91,7 @@ function mount_image() {
   LOOPDEV=$(losetup --find --partscan --show "${1:-${IMAGE}}")
   # Partscan is racy
   wait_until_settled "${LOOPDEV}"
-  mount -o compress-force=zstd "${LOOPDEV}p3" "${MOUNT}"
+  mount "${LOOPDEV}p3" "${MOUNT}"
   # Setup bind mount to package cache
   mount --bind "/var/cache/apt/archives" "${MOUNT}/var/cache/apt/archives"
 }
@@ -128,12 +128,9 @@ function create_image() {
       "${tmp_image}"
   fi
   mount_image "${tmp_image}"
-  if [ -n "${DISK_SIZE}" ]; then
-    btrfs filesystem resize max "${MOUNT}"
-  fi
 
   if [ 0 -lt "${#PACKAGES[@]}" ]; then
-    arch-chroot "${MOUNT}" /usr/bin/oma install -y "${PACKAGES[@]}"
+    arch-chroot "${MOUNT}" /usr/bin/oma install --no-check-dbus -y "${PACKAGES[@]}"
   fi
   if [ 0 -lt "${#SERVICES[@]}" ]; then
     arch-chroot "${MOUNT}" /usr/bin/systemctl enable "${SERVICES[@]}"
@@ -169,9 +166,7 @@ function main() {
     build_version="${1}"
   fi
 
-  # shellcheck source=images/common.sh
-  source "${ORIG_PWD}/images/common.sh"
-  for image in "${ORIG_PWD}/images/"!(base|common).sh; do
+  for image in "${ORIG_PWD}/images/"!(base).sh; do
     # shellcheck source=/dev/null
     source "${image}"
     create_image "${IMAGE_NAME}" pre post
