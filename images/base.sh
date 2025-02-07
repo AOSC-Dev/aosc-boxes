@@ -12,8 +12,6 @@ function pre() {
   arch-chroot "${MOUNT}" /bin/bash -e <<EOF
 source /etc/profile
 systemctl enable sshd
-systemctl enable systemd-networkd
-systemctl enable systemd-resolved
 systemctl enable systemd-timesyncd
 systemctl enable systemd-time-wait-sync
 EOF
@@ -25,5 +23,6 @@ EOF
   # setup unpredictable kernel names
   sed -i 's/^GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX="net.ifnames=0"/' "${MOUNT}/etc/default/grub"
   sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=\"rootflags=compress-force=zstd\"/' "${MOUNT}/etc/default/grub"
+  arch-chroot "${MOUNT}" /usr/bin/dracut --force --add "btrfs"
   arch-chroot "${MOUNT}" /usr/bin/grub-mkconfig -o /boot/grub/grub.cfg
 }
