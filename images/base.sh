@@ -13,7 +13,7 @@ function pre() {
 source /etc/profile
 systemctl enable sshd
 systemctl enable systemd-timesyncd
-systemctl enable systemd-time-wait-sync
+systemctl enable NetworkManager
 EOF
 
   # GRUB

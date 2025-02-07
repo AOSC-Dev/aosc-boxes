@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034,SC2154
 IMAGE_NAME="AOSC-OS-x86_64-basic-${build_version}.qcow2"
 # It is meant for local usage so the disk should be "big enough".
-DISK_SIZE="40G"
+DISK_SIZE="15G"
 PACKAGES=()
 SERVICES=()
 
