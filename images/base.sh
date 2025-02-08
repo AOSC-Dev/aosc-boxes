@@ -8,13 +8,7 @@ function pre() {
   rm "${MOUNT}/etc/machine-id"
 
   arch-chroot "${MOUNT}" /usr/bin/systemd-firstboot --locale=C.UTF-8 --timezone=UTC --hostname=aosc --keymap=us
-  # enabling important services
-  arch-chroot "${MOUNT}" /bin/bash -e <<EOF
-source /etc/profile
-systemctl enable sshd
-systemctl enable systemd-timesyncd
-systemctl enable NetworkManager
-EOF
+  systemctl --root="${MOUNT}" enable sshd NetworkManager systemd-timesyncd
 
   # GRUB
   arch-chroot "${MOUNT}" /usr/bin/grub-install --target=i386-pc "${LOOPDEV}"

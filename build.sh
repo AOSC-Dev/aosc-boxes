@@ -135,7 +135,7 @@ function create_image() {
     arch-chroot "${MOUNT}" /usr/bin/oma install --no-check-dbus -y "${PACKAGES[@]}"
   fi
   if [ 0 -lt "${#SERVICES[@]}" ]; then
-    arch-chroot "${MOUNT}" /usr/bin/systemctl enable "${SERVICES[@]}"
+    systemctl --root=${MOUNT} enable "${SERVICES[@]}"
   fi
   "${2}"
   image_cleanup
