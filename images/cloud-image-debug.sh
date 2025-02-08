@@ -14,9 +14,9 @@ function pre() {
   echo 'GRUB_SERIAL_COMMAND="serial --speed=115200"' >>"${MOUNT}/etc/default/grub"
   arch-chroot "${MOUNT}" /usr/bin/grub-mkconfig -o /boot/grub/grub.cfg
   # cloud-init topic
-  cloud-init-topic=$(curl https://repo.aosc.io/debs/manifest/topics.json | jq '.[] | select(.name | test("^cloud-init.*"))' | jq -s 'max_by(.name) | .name')
+  export cloud_init_topic=$(curl https://repo.aosc.io/debs/manifest/topics.json | jq '.[] | select(.name | test("^cloud-init.*"))' | jq -r -s 'max_by(.name) | .name')
   if [ -n "${cloud-init-topic}" ]; then
-    arch-chroot "${MOUNT}" /usr/bin/oma topics --opt-in "${cloud-init-topic}"
+    arch-chroot "${MOUNT}" /usr/bin/oma topics --no-check-dbus --opt-in "${cloud_init_topic}"
   fi
   arch-chroot "${MOUNT}" /usr/bin/oma install -y --no-check-dbus cloud-init
   systemctl --root="${MOUNT}" enable cloud-init-main cloud-init-local cloud-init-network cloud-config cloud-final
