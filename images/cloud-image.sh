@@ -3,7 +3,7 @@
 IMAGE_NAME="AOSC-OS-x86_64-cloudimg-${build_version}.qcow2"
 DISK_SIZE="16G"
 PACKAGES=(cloud-init cloud-utils)
-SERVICES=(cloud-init.service)
+SERVICES=(cloud-init-main.service cloud-init-local.service cloud-init-network.service cloud-config.service cloud-final.service)
 
 function pre() {
   sed -Ei 's/^(GRUB_CMDLINE_LINUX_DEFAULT=.*)"$/\1 console=tty0 console=ttyS0,115200"/' "${MOUNT}/etc/default/grub"
