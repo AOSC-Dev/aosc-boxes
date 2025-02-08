@@ -152,13 +152,6 @@ function main() {
   fi
   init
 
-  setup_disk
-  bootstrap
-  # shellcheck source=images/base.sh
-  source "${ORIG_PWD}/images/base.sh"
-  pre
-  unmount_image
-
   local build_version
   if [ -z "${1:-}" ]; then
     build_version="$(date +%Y%m%d)"
@@ -167,6 +160,13 @@ function main() {
   else
     build_version="${1}"
   fi
+
+  setup_disk
+  bootstrap
+  # shellcheck source=images/base.sh
+  source "${ORIG_PWD}/images/base.sh"
+  pre
+  unmount_image
 
   for image in "${ORIG_PWD}/images/"!(base).sh; do
     # shellcheck source=/dev/null
