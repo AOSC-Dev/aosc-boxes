@@ -18,8 +18,8 @@ function pre() {
   if [ -n "${cloud-init-topic}" ]; then
     arch-chroot "${MOUNT}" /usr/bin/oma topics --no-check-dbus --opt-in "${cloud_init_topic}"
   fi
-  arch-chroot "${MOUNT}" /usr/bin/oma install -y --no-check-dbus cloud-init
-  systemctl --root="${MOUNT}" enable cloud-init-main cloud-init-local cloud-init-network cloud-config cloud-final
+  arch-chroot ${MOUNT} /usr/bin/oma install -y --no-check-dbus cloud-init
+  systemctl --root=${MOUNT} enable cloud-init-main cloud-init-local cloud-init-network cloud-config cloud-final
 }
 
 function post() {
