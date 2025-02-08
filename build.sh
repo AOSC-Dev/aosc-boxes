@@ -5,7 +5,7 @@
 # errexit: "Exit immediately if [...] command exits with a non-zero status."
 set -o nounset -o errexit
 shopt -s extglob
-readonly DEFAULT_DISK_SIZE="15G"
+readonly DEFAULT_DISK_SIZE="16G"
 readonly IMAGE="image.img"
 # shellcheck disable=SC2016
 readonly MIRROR='https://repo.aosc.io/debs'
@@ -58,8 +58,8 @@ function setup_disk() {
   # Partscan is racy
   wait_until_settled "${LOOPDEV}"
   mkfs.fat -F 32 -S 4096 "${LOOPDEV}p2"
-  mkfs.btrfs "${LOOPDEV}p3"
-  mount -o compress-force=zstd "${LOOPDEV}p3" "${MOUNT}"
+  mkfs.ext4 "${LOOPDEV}p3"
+  mount "${LOOPDEV}p3" "${MOUNT}"
   mount --mkdir "${LOOPDEV}p2" "${MOUNT}/efi"
 }
 
@@ -130,9 +130,6 @@ function create_image() {
       "${tmp_image}"
   fi
   mount_image "${tmp_image}"
-  if [ -n "${DISK_SIZE}" ]; then
-    btrfs filesystem resize max "${MOUNT}"
-  fi
 
   if [ 0 -lt "${#PACKAGES[@]}" ]; then
     arch-chroot "${MOUNT}" /usr/bin/oma install --no-check-dbus -y "${PACKAGES[@]}"
@@ -164,7 +161,7 @@ function main() {
 
   local build_version
   if [ -z "${1:-}" ]; then
-    build_version="$(date +%Y%m%d).0"
+    build_version="$(date +%Y%m%d)"
     echo "WARNING: BUILD_VERSION wasn't set!"
     echo "Falling back to $build_version"
   else
