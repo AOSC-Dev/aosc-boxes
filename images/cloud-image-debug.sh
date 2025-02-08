@@ -3,7 +3,6 @@
 IMAGE_NAME="AOSC-OS-x86_64-cloudimg-debug-${build_version}.qcow2"
 DISK_SIZE="16G"
 PACKAGES=(cloud-utils)
-SERVICES=(cloud-init-main.service cloud-init-local.service cloud-init-network.service cloud-config.service cloud-final.service)
 
 function pre() {
   local NEWUSER="aosc"
@@ -20,6 +19,7 @@ function pre() {
     arch-chroot "${MOUNT}" /usr/bin/oma topics --opt-in "${cloud-init-topic}"
   fi
   arch-chroot "${MOUNT}" /usr/bin/oma install -y --no-check-dbus cloud-init
+  systemctl --root="${MOUNT}" enable cloud-init-main cloud-init-local cloud-init-network cloud-config cloud-final
 }
 
 function post() {
