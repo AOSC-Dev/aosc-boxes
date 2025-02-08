@@ -1,7 +1,7 @@
 #!/bin/bash
 # shellcheck disable=SC2034,SC2154
 IMAGE_NAME="AOSC-OS-x86_64-cloudimg-debug-${build_version}.qcow2"
-DISK_SIZE="15G"
+DISK_SIZE="16G"
 PACKAGES=(cloud-utils)
 SERVICES=(cloud-init-main.service cloud-init-local.service cloud-init-network.service cloud-config.service cloud-final.service)
 
