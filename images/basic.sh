@@ -3,7 +3,7 @@
 IMAGE_NAME="AOSC-OS-${AOSC_ARCH}-basic-${build_version}.qcow2"
 # It is meant for local usage so the disk should be "big enough".
 DISK_SIZE="16G"
-PACKAGES=()
+PACKAGES=(qemu-guest-agent)
 SERVICES=()
 
 function pre() {

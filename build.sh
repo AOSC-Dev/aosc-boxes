@@ -65,7 +65,7 @@ function setup_disk() {
 
 # Install AOSC to the filesystem (bootstrap)
 function bootstrap() {
-  aoscbootstrap stable "${MOUNT}" --arch=$AOSC_ARCH --config=/usr/share/aoscbootstrap/config/aosc-mainline.toml --include-files="${ORIG_PWD}/recipes/base.lst" "${MIRROR}" --force
+  aoscbootstrap stable "${MOUNT}" --arch=$AOSC_ARCH --config=/usr/share/aoscbootstrap/config/aosc-mainline.toml --include-files="/usr/share/aoscbootstrap/recipes/base.lst" "${MIRROR}" --force
 }
 
 # Cleanup the image and trim it

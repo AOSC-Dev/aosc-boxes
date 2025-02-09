@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034,SC2154
 IMAGE_NAME="AOSC-OS-${AOSC_ARCH}-cloudimg-debug-${build_version}.qcow2"
 DISK_SIZE="16G"
-PACKAGES=(cloud-utils)
+PACKAGES=(qemu-guest-agent cloud-utils)
 
 function pre() {
   local NEWUSER="aosc"
