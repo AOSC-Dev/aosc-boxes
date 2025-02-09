@@ -3,6 +3,7 @@
 IMAGE_NAME="AOSC-OS-${AOSC_ARCH}-cloudimg-debug-${build_version}.qcow2"
 DISK_SIZE="16G"
 PACKAGES=(qemu-guest-agent cloud-utils)
+SERVICES=()
 
 function pre() {
   local NEWUSER="aosc"
