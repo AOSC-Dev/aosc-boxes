@@ -15,9 +15,10 @@ function pre() {
   arch-chroot "${MOUNT}" /usr/bin/grub-mkconfig -o /boot/grub/grub.cfg
   # cloud-init topic
   export cloud_init_topic=$(curl https://repo.aosc.io/debs/manifest/topics.json | jq '.[] | select(.name | test("^cloud-init.*"))' | jq -r -s 'max_by(.name) | .name')
-  if [ -n "${cloud-init-topic}" ]; then
+  if [ "${cloud_init_topic}" != "null" ] && [ ! -z "${cloud_init_topic}" ]; then
     arch-chroot "${MOUNT}" /usr/bin/oma topics --no-check-dbus --opt-in "${cloud_init_topic}"
-  fi
+  fi 
+
   arch-chroot ${MOUNT} /usr/bin/oma install -y --no-check-dbus cloud-init
   systemctl --root=${MOUNT} enable cloud-init-main cloud-init-local cloud-init-network cloud-config cloud-final
 }
