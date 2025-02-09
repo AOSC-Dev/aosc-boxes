@@ -2,6 +2,15 @@ boot-base
 systemd-base
 kernel-base
 editor-base
+admin-base
+aosc-os-presets-base
+audio-base
+core-base
+kmscon-base
+network-base
+python-base
+util-base
+web-base
 qemu-guest-agent
 openssh
 sudo

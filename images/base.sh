@@ -7,7 +7,8 @@ function pre() {
   # https://gitlab.archlinux.org/archlinux/arch-boxes/-/issues/117
   rm "${MOUNT}/etc/machine-id"
 
-  echo "build_version: $build_version\n build_time: $(date)\n" >> "${MOUNT}/etc/aosc-image.info"
+  echo "build_version: $build_version" >> "${MOUNT}/etc/aosc-image.info"
+  echo "build_time: $(date)" >> "${MOUNT}/etc/aosc-image.info"
 
   arch-chroot "${MOUNT}" /usr/bin/systemd-firstboot --locale=C.UTF-8 --timezone=UTC --hostname=aosc --keymap=us
   systemctl --root=${MOUNT} enable sshd NetworkManager systemd-timesyncd
