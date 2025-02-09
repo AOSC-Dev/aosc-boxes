@@ -17,7 +17,7 @@ function pre() {
     arch-chroot "${MOUNT}" /usr/bin/grub-install --target=i386-pc "${LOOPDEV}"
     arch-chroot "${MOUNT}" /usr/bin/grub-install --target=x86_64-efi --efi-directory=/efi --removable
   else
-    arch-chroot "${MOUNT}" /usr/bin/grub-install --target=$(uname -m)-efi --efi-directory=/efi --removable
+    arch-chroot "${MOUNT}" /usr/bin/grub-install --target=${AOSC_ARCH}-efi --efi-directory=/efi --removable
   fi
   
   sed -i 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=1/' "${MOUNT}/etc/default/grub"
