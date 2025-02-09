@@ -11,18 +11,6 @@ function pre() {
   arch-chroot "${MOUNT}" /usr/bin/useradd -m -U "${NEWUSER}"
   echo -e "${NEWUSER}\n${NEWUSER}" | arch-chroot "${MOUNT}" /usr/bin/passwd "${NEWUSER}"
   echo "${NEWUSER} ALL=(ALL) NOPASSWD: ALL" >"${MOUNT}/etc/sudoers.d/${NEWUSER}"
-
-  cat <<EOF >"${MOUNT}/etc/systemd/network/80-dhcp.network"
-[Match]
-Name=en*
-Name=eth*
-
-[Link]
-RequiredForOnline=routable
-
-[Network]
-DHCP=yes
-EOF
 }
 
 function post() {

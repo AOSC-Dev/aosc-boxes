@@ -20,7 +20,11 @@ function pre() {
   fi 
 
   arch-chroot ${MOUNT} /usr/bin/oma install -y --no-check-dbus cloud-init
-  systemctl --root=${MOUNT} enable cloud-init-main cloud-init-local cloud-init-network cloud-config cloud-final
+  # add cloud-init services to cloud-init.preset
+  cloud_init_services=(cloud-init-main.service cloud-init-network.service cloud-init-local.service cloud-config.service cloud-final.service)
+  for service in "${cloud_init_services[@]}"; do
+    echo "enable ${service}" >> "${MOUNT}/usr/lib/systemd/system-preset/50-cloud-init.preset"
+  done
 }
 
 function post() {

@@ -135,7 +135,9 @@ function create_image() {
     arch-chroot "${MOUNT}" /usr/bin/oma install --no-check-dbus -y "${PACKAGES[@]}"
   fi
   if [ 0 -lt "${#SERVICES[@]}" ]; then
-    systemctl --root=${MOUNT} enable "${SERVICES[@]}"
+    for service in "${SERVICES[@]}"; do
+      echo "enable ${service}" >>"${MOUNT}/usr/lib/systemd/system-preset/80-aosc-image.preset"
+    done
   fi
   "${2}"
   image_cleanup

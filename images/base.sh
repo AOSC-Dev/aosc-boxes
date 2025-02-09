@@ -11,7 +11,6 @@ function pre() {
   echo "build_time: $(date)" >> "${MOUNT}/etc/aosc-image.info"
 
   arch-chroot "${MOUNT}" /usr/bin/systemd-firstboot --locale=C.UTF-8 --timezone=UTC --hostname=aosc --keymap=us
-  systemctl --root=${MOUNT} enable sshd NetworkManager systemd-timesyncd
 
   # GRUB
   arch-chroot "${MOUNT}" /usr/bin/grub-install --target=i386-pc "${LOOPDEV}"
