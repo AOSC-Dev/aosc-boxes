@@ -12,9 +12,14 @@ function pre() {
 
   arch-chroot "${MOUNT}" /usr/bin/systemd-firstboot --locale=C.UTF-8 --timezone=UTC --hostname=aosc --keymap=us
 
-  # GRUB
-  arch-chroot "${MOUNT}" /usr/bin/grub-install --target=i386-pc "${LOOPDEV}"
-  arch-chroot "${MOUNT}" /usr/bin/grub-install --target=x86_64-efi --efi-directory=/efi --removable
+  # GRUB: remain compatible with BIOS and UEFI for amd64, UEFI for the rest
+  if [ ${AOSC_ARCH} == "amd64" ]; then
+    arch-chroot "${MOUNT}" /usr/bin/grub-install --target=i386-pc "${LOOPDEV}"
+    arch-chroot "${MOUNT}" /usr/bin/grub-install --target=x86_64-efi --efi-directory=/efi --removable
+  else
+    arch-chroot "${MOUNT}" /usr/bin/grub-install --target=$(uname -m)-efi --efi-directory=/efi --removable
+  fi
+  
   sed -i 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=1/' "${MOUNT}/etc/default/grub"
   # setup unpredictable kernel names
   sed -i 's/^GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX="net.ifnames=0"/' "${MOUNT}/etc/default/grub"
