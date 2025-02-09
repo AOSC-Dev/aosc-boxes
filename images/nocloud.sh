@@ -1,7 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2034,SC2154
-IMAGE_NAME="AOSC-OS-${AOSC_ARCH}-basic-${build_version}.qcow2"
-# It is meant for local usage so the disk should be "big enough".
+IMAGE_NAME="AOSC-OS-${AOSC_ARCH}-nocloud-${build_version}.qcow2"
 DISK_SIZE="16G"
 PACKAGES=(qemu-guest-agent)
 SERVICES=()
